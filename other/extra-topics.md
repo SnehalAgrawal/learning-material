@@ -1,16 +1,12 @@
-* [[Some Concepts|Some Concepts]]
-* [[Design Patterns|Design Patterns]]
-* [[SystemDesign|System Design]]
- ---
 ### 1. **Programming Languages**
-#### [[Javascript Concepts]]
+#### Javascript Concepts
 - Advanced ES6+ features (destructuring, spread, async/await, etc.)
 - Closures, Hoisting, Event Loop, Promises
 - Functional programming (map, reduce, filter)
 - Memory management and performance optimization
 - Browser APIs and the DOM
-- [[TypeScript fundamentals]]
-#### [[Python Concepts]]
+- TypeScript fundamentals
+#### Python Concepts
 - Pythonic constructs and idioms
 - Data structures: list, dict, set, tuple
 - Comprehensions and generators
@@ -97,9 +93,9 @@
 - Monitoring, alerting and observability
 ---
 ### 6. **Design Patterns**
-- [[SOLID principles]]
-- [[MVC, MVP, MVVM architecture]] (Design patten for UI driven Apps)
-- [[Design Patterns]]
+- SOLID principles
+- MVC, MVP, MVVM architecture (Design patten for UI driven Apps)
+- Design Patterns
 	- Module
 	- Singleton
 	- Factory
@@ -126,12 +122,6 @@
 - Sliding window and two pointer techniques
 ---
 ### 8. **Additional Important Areas**
-#### Leadership & Engineering Management
-- Team scaling and hiring strategy
-- Project planning (Agile, Scrum, Kanban)
-- Architecture decision documentation (ADR)
-- Tech debt management
-- Conflict resolution and mentorship
 #### Testing
 - Unit, integration, and E2E testing
 - Jest, Mocha/Chai (JavaScript), PyTest
@@ -146,17 +136,3 @@
 - Frontend performance (LCP, TTI, bundle size)
 - Backend profiling and bottleneck resolution
 - Load testing (k6, JMeter)
----
-### Recommended Sequence to Study:
-1. **JavaScript & Python Core + DSA**
-2. **API Architecture + Design Patterns**
-3. **Database Design + Query Optimization**
-4. **Docker + Kubernetes + DevOps Basics**
-5. **System Design + Scalability Concepts**
-6. **Cloud Services (Azure/GCP)**
-7. **Testing, Security, Observability**
-8. **Engineering Leadership & Project Management**
----
-### System Example
-1. [[High Performance Socket Connection]]
-2. 
