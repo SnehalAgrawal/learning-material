@@ -30,10 +30,77 @@ The System Design interview is a test of your ability to handle ambiguity and dr
 
 ### 6. Interview Focus
 *   **Driving the Session**: "Don't wait for permission. Say: 'I'll start by clarifying requirements, then I'll move to API design. Does that sound good?'"
+    * Clarify functional requirements: What core actions must the system support? (e.g., for a URL shortener: create, redirect, delete).
+    * Clarify non-functional requirements (NFRs): Scalability (DAU/MAU), availability (SLAs), latency (p95/p99 targets), consistency needs (strong vs eventual), durability, security, operability.
+    * Clarify constraints: Budget, timeline, team size, existing tech stack, data retention policies, regulatory requirements (GDPR, HIPAA, etc.).
+    * Prioritize: Identify MVP scope vs nice-to-haves for future iterations.
 *   **Handling Constraints**: "What if the storage is limited? How would you change your schema?"
+    * Storage constraints: If storage is limited, use data compression (e.g., gzip for text, efficient codecs for media), data lifecycle policies (move old data to cold storage), TTL-based expiration for transient data, and efficient data structures (e.g., Bloom filters for URL lookups).
+    * Schema changes: Use denormalization for faster reads when space permits, or vertical/horizontal partitioning to distribute data across storage units. Consider encoding strategies (e.g., base62 for short codes) to minimize storage.
+    * Example: In a URL shortener with limited storage, use base62 encoding for short codes (62 chars vs 10 for decimal) to reduce storage per entry, implement TTL on expired URLs, and use Bloom filters for quick existence checks without full DB lookups.
+    * Tradeoffs: Storage savings may come at the cost of increased query complexity or slower writes (due to compression/encoding overhead).
 *   **Failure Thinking**: "What happens if this database node goes down right now?"
+    * Node failure detection: Use health checks (e.g., Prometheus exporters, Kubernetes liveness probes) and heartbeats to detect failed nodes quickly (typically within seconds).
+    * Automatic failover: Implement automatic failover to healthy replicas using load balancers and database clustering mechanisms (e.g., primary-replica in PostgreSQL/MySQL, consistent hashing for Cassandra).
+    * Data consistency: Use quorum-based writes (require acknowledgments from majority of replicas) to maintain consistency during failures. Implement conflict resolution mechanisms (e.g., last-write-wins, vector clocks) when needed.
+    * Recovery: After failure, automatically heal the cluster by promoting a replica to primary and creating a new replica to restore redundancy. Use read replicas for read scaling and offload backup/maintenance operations.
+    * Graceful degradation: Design the system to function in a degraded state when failures occur. For example, in a URL shortener, if the main DB is down, use local cache or read replicas; if both are unavailable, return cached redirects for popular URLs if available.
+    * Error handling: Return appropriate error codes (e.g., 503 Service Unavailable) with Retry-After headers, and implement circuit breakers to prevent cascading failures.
+    * Monitoring: Monitor failover times, error rates, and data consistency metrics to ensure system health.
 
 ### 7. Common Mistakes
 *   **Silence**: Thinking in your head for 2 minutes. Always think out loud.
 *   **Jumping to the DB immediately**: Choosing "Couchbase" or "Kafka" before you even know what the functional requirements are.
 *   **Ignoring Non-Functional Requirements**: Designing a functional system that can only handle 10 users per second when the prompt asked for 10 million.
+
+---
+
+## Bloom Filters
+A Bloom filter in databases is a probabilistic data structure used to quickly check whether an element might be present in a set — or definitely not present.
+
+### Core idea
+* It uses a bit array + multiple hash functions
+* When you insert a value → multiple bits are set
+* When you query:
+    * If any required bit is 0 → definitely not present
+    * If all bits are 1 → maybe present (false positives possible)
+* So:
+    * ❌ No false negatives
+    * ⚠️ Possible false positives
+    * ✅ Very fast and memory-efficient
+
+### Common use cases:
+* **Join optimization**
+    * In distributed systems (like Apache Spark or Apache Hive)
+    * A Bloom filter is built on one table and pushed to another node
+    * Helps skip rows that definitely won’t match → reduces data shuffle
+* **Storage engines / SSTables**
+    * In systems like Apache Cassandra or RocksDB
+    * Before hitting disk, Bloom filter checks:
+    * “Does this SSTable even contain this key?”
+    * If “no” → skip disk read entirely
+* **Query acceleration**
+    * Used in columnar DBs (e.g., ClickHouse)
+    * Helps filter blocks early
+
+### Is it enabled by default?
+* 👉 Short answer: It depends on the database.
+* 1. Enabled by default (common in storage engines)
+    * Apache Cassandra → Yes (configurable but typically on)
+    * RocksDB → Often enabled via block-based table options
+* 2. Not automatic (you must enable/configure)
+    * Apache Spark → You explicitly create Bloom filters
+    * PostgreSQL → Requires extension (e.g., bloom index)
+    * Apache Hive → Enabled via query hints or configs
+
+Bloom filters in PostgreSQL work via an index, and the query planner decides when to use it.
+```sql
+CREATE EXTENSION bloom;
+
+-- Create bloom index
+CREATE INDEX user_email_bloom ON users
+USING bloom (email);
+
+-- Query planner uses it automatically when filterable
+SELECT * FROM users WHERE email = [EMAIL_ADDRESS]';
+```

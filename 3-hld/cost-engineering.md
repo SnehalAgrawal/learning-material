@@ -28,8 +28,25 @@ Cost is a first-class engineering metric for senior architects. Cost Engineering
 
 ### 6. Interview Focus
 *   **The "Build vs. Buy" Cost**: "Should we build our own Auth system or use Auth0? How do you calculate the TCO (Total Cost of Ownership)?"
+    * Build: Higher initial dev cost, full control, no vendor lock-in, but ongoing maintenance burden.
+    * Buy: Lower upfront cost, faster to market, provider handles updates/security, but recurring subscription fees and less flexibility.
+    * TCO Calculation:
+        * Build: (dev salaries × time) + infra + maintenance + opportunity cost.
+        * Buy: (subscription fees × time) + migration cost + potential customization costs.
+    * I'd choose Buy for non-core features (like auth) to speed up time-to-market, but Build for core IP that differentiates us.
 *   **Scaling Economics**: "At what point in our growth does it make sense to move from AWS Lambda to a Kubernetes cluster?"
+    * Depends on cost vs. control.
+    * Lambda is great for spiky traffic, but can get expensive at high, steady volume.
+    * Kubernetes gives more control and can be cheaper at scale (better resource utilization), but requires operational overhead (DevOps team, cluster management).
+    * Breakeven point varies, but typically: Lambda for <100 RPM baseline (with spiky peaks); Kubernetes for >500 RPM consistent load.
 *   **Hidden Costs**: "How does choosing a multi-region Active-Active architecture impact our monthly AWS bill?"
+    * Multi-region = 2x+ costs for compute, databases, and data transfer. Active-Active adds complexity (data sync, latency) and higher egress costs.
+    * Need to factor in:
+        * Duplicate infrastructure in each region
+        * Data replication costs (cross-region replication)
+        * Load balancing across regions
+        * Higher bandwidth/egress charges
+    * Only justify when required for disaster recovery or low-latency global user access.
 
 ### 7. Common Mistakes
 *   **Ignoring Idle Resources**: Leaving a huge DB instance running for a staging environment that nobody uses.
