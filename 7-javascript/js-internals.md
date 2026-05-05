@@ -29,8 +29,55 @@ Understanding JavaScript internals is what separates a senior engineer from a "f
 
 ### 6. Interview Focus
 *   **Closure Mechanics**: "Write a function that returns a counter. How does the counter persist without a global variable?"
+    ```javascript
+    function createCounter() {
+        let count = 0;
+        
+        return function() {
+            count++;
+            return count;
+        };
+    }
+    
+    const counter = createCounter();
+    console.log(counter()); // 1
+    console.log(counter()); // 2
+    // 'count' variable is enclosed within the closure and persists across calls
+    ```
 *   **V8 Optimization**: "Why is `const obj = {a: 1}; obj.b = 2;` potentially slower than `const obj = {a: 1, b: 2};` in a hot loop?" (Hidden Classes).
+    * **Answer**: In V8, when you create objects, they are assigned a "Hidden Class" (or Shape) that represents their internal structure. When you add properties to an object dynamically (like `obj.b = 2`), V8 may need to create a new Hidden Class or update the existing one. If this happens inside a hot loop, V8 has to de-optimize the code, which incurs a performance penalty. Creating objects with all properties upfront (like `const obj = {a: 1, b: 2};`) allows V8 to create a single, optimized Hidden Class, avoiding the de-optimization cost.
+    ```javascript
+    // Optimized approach: Define all properties upfront
+    function createOptimizedObject(value1, value2) {
+        return {
+            a: value1,
+            b: value2
+        };
+    }
+    
+    // Less optimized approach: Dynamic property addition
+    function createOptimizedObject(value1, value2) {
+        const obj = {};
+        obj.a = value1;
+        obj.b = value2; // This may cause hidden class transition
+        return obj;
+    }
+    ```
 *   **Prototype Lookup**: "What happens when you call `toString()` on an empty object `{}`? Walk me through the chain."
+    * **Answer**: When you call `toString()` on an empty object, JavaScript's prototype chain lookup works as follows:
+        1. **Check Own Properties**: First, it checks if the object itself has a `toString` property.
+        2. **Prototype Chain**: If not found, it looks at the object's prototype: `Object.getPrototypeOf({})`, which is `Object.prototype`.
+        3. **Find Method**: `Object.prototype` has a `toString` method.
+        4. **Execute**: The method is called with `this` bound to the empty object.
+    ```javascript
+    const emptyObject = {};
+    
+    // 1. Check own properties: emptyObject has no toString
+    // 2. Prototype lookup: emptyObject.__proto__ is Object.prototype
+    // 3. Found: Object.prototype.toString
+    // 4. Execute: [object Object]
+    console.log(emptyObject.toString()); // Output: "[object Object]"
+    ```
 
 ### 7. Common Mistakes
 *   **The 'this' Trap**: Calling a method that uses `this` as a callback (e.g., in `setTimeout`) and losing the context, resulting in `this` being `undefined` or `window`.

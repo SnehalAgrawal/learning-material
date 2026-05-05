@@ -62,8 +62,14 @@ type Admin = User & { isAdmin: boolean };
 ### 7. **Generics**
 Write reusable, type-safe code:
 ```ts
+// T → any type
 function wrapInArray<T>(value: T): T[] {   
 	return [value]; 
+}
+
+// T extends object → only object types allowed
+function wrapInObject<T extends object>(value: T): T & { name: string } {
+  return { ...value, name: "" };
 }
 ```
 ---

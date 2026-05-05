@@ -27,8 +27,34 @@ Database scaling is the process of expanding a database to handle increasing amo
 
 ### 6. Interview Focus
 *   **The Scaling Strategy**: "Our SQL database is reaching its limits. Walk me through the steps you would take to scale it, starting with the easiest."
+    * **Vertical Scaling**: Increase RAM/CPU of the existing server.
+    * **Read Replicas**: Add read replicas to handle read traffic.
+    * **Caching**: Implement Redis or Memcached to reduce database load.
+    * **Sharding**: Partition data across multiple servers if vertical scaling is not enough.
+    * **Database Optimization**: Optimize queries and add indexes.
+    * **Connection Pooling**: Use connection pooling to reduce connection overhead.
+    * **Denormalization**: Duplicate data to reduce joins and improve query performance.
+    * **Materialized Views**: Precompute and store query results for faster access.
 *   **Shard Key Design**: "If we shard our 'Uber-like' app by `city_id`, what happens when New York City has 100x more traffic than Buffalo? How do you fix the hot shard?"
+    * **Hot Shard**: When one partition key receives a disproportionately high volume of requests compared to others, causing a bottleneck. In DynamoDB, this can happen if you use a non-random partition key (e.g., `userId`) and a few users are very active.
+    * **Solution**: Use **Composite Keys** with a **Randomized Partition Key** or **Sharding**.
+    ```
+    // DynamoDB Schema for Social Feed
+    {PartitionKey: 'USER#123', SortKey: 'TIMESTAMP#2024-01-01T10:00:00Z', data: {...}} // Actual Post
+    {PartitionKey: 'USER#123', SortKey: 'FEED#2024-01-01T10:00:00Z', data: {...}} // Aggregated Feed Item
+    ```
+    To avoid hot partitions, you can hash the partition key or use a random prefix to distribute data across multiple physical partitions.
+    ```
+    // Randomized Partition Key Example
+    {PartitionKey: 'USER#123#abc', SortKey: 'TIMESTAMP#2024-01-01T10:00:00Z', ...} 
+    ```
 *   **Replication Lag**: "How do you handle the case where a user updates their profile and the 'Profile View' page still shows old data?"
+    * **Replication Lag**: When a user updates their profile, the changes are written to the primary database. However, due to network latency or replication delay, the read replicas may not have received the updated data yet. As a result, when a user views their profile page, they might see stale data from a replica that hasn't been updated.
+    * **Solution**: Use **Read-Your-Writes Consistency** or **Synchronous Replication**.
+    ```
+    // Read-Your-Writes Consistency Example
+    After a successful write to the primary database, explicitly read from the primary for the next request.
+    ```
 
 ### 7. Common Mistakes
 *   **The "Big Shard" Mistake**: Waiting too long to shard. By the time the DB is too big, moving it to a sharded architecture requires days of downtime.

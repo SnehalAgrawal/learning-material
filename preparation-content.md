@@ -250,6 +250,8 @@
 - [ ]  [Auto scaling](./10-cloud-infra/scaling-deployment.md)
 - [ ]  [CI/CD](./10-cloud-infra/scaling-deployment.md)
 - [ ]  [Blue-green deployment](./10-cloud-infra/scaling-deployment.md)
+- [ ]  [Terraform](./10-cloud-infra/terraform.md)
+- [ ]  [Helm](./10-cloud-infra/helm.md)
 
 ---
 

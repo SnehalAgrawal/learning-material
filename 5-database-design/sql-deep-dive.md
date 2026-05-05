@@ -32,8 +32,82 @@ Relational Databases (SQL) are the bedrock of transaction systems. For a senior 
 
 ### 6. Interview Focus
 *   **Execution Plans**: "How do you use `EXPLAIN ANALYZE` to find why a 1-second query is taking 10 seconds?"
+    * **EXPLAIN**: Shows the query plan (how the DB *intends* to execute the query).
+    * **ANALYZE**: Actually executes the query and shows the *actual* runtime statistics.
+    * Key things to look for: Sequential Scans on large tables, Nested Loop joins that could be Hash Joins, High Row Estimates vs Actuals (indicating bad statistics or missing indexes).
+    
+    
+    // Example Output Analysis
+    ```
+    Seq Scan on users  (cost=0.00..2500.00 rows=1000 width=100)
+    (actual time=0.050..50.000 rows=1000 loops=1)
+
+    ```
+    **Analysis**: We are doing a "Sequential Scan" on the `users` table, which means we are reading every single row. If the table has 10 million rows, this will be very slow. We should add an index on the column we are filtering by.
+    
+    // With Index
+    ```
+    Index Scan using idx_users_email on users (cost=0.00..8.00 rows=1 width=100)
+    (actual time=0.030..0.040 rows=1 loops=1)
+    Filter: (email = 'test@example.com')
+    ```
+    **Analysis**: Now we are using an index scan, which is much faster as it only reads the specific row we need.
+
 *   **Deadlock Resolution**: "Two users try to update each other's status at the same time. A deadlock occurs. How does the DB handle it? How do you prevent it?"
+    * **How DB handles it**: The database detects the deadlock (usually via a "Deadlock Detector" thread that checks for circular dependencies in the wait-for graph) and aborts one of the transactions (the "victim"). The victim transaction is rolled back, and the lock it held is released, allowing the other transaction to proceed.
+    * **Prevention Techniques**:
+        * **Consistent Lock Ordering**: Always acquire locks in the same order. For example, always update User A before User B. If both transactions try to do this, one will succeed and the other will wait, preventing a cycle.
+        * **Lock Timeout**: Set a `lock_timeout` (e.g., `SET lock_timeout = '10s'`). If a transaction has to wait longer than this for a lock, it fails automatically, breaking the deadlock.
+        * **Deadlock Monitoring**: Use `pg_stat_activity` (Postgres) or `SHOW ENGINE INNODB STATUS` (MySQL) to monitor for deadlocks and analyze the queries involved.
+    ```sql
+    -- Example: Setting a lock timeout in PostgreSQL
+    SET LOCAL lock_timeout = '1s';
+
+    BEGIN;
+    -- User A updates their status
+    UPDATE users SET status = 'online' WHERE id = 1;
+    -- User B updates their status (trying to lock User A's row)
+    UPDATE users SET status = 'online' WHERE id = 1;
+    COMMIT;
+    ```
+    **Scenario**: User A and User B try to update each other's status simultaneously. Without a timeout, they wait forever. With `lock_timeout = '1s'`, one of them will fail after 1 second, allowing the other to proceed.
+
 *   **Design Question**: "Design the schema for a School Management System. How do you handle a student having multiple classes and a class having multiple students?" (Many-to-Many).
+    * **Solution**: Use a **Many-to-Many Relationship** with a **Junction Table**.
+    ```sql
+    -- Students Table
+    CREATE TABLE students (
+        id INT PRIMARY KEY,
+        name VARCHAR(100)
+    );
+
+    -- Classes Table
+    CREATE TABLE classes (
+        id INT PRIMARY KEY,
+        name VARCHAR(100)
+    );
+
+    -- Junction Table (Many-to-Many)
+    CREATE TABLE enrollments (
+        student_id INT,
+        class_id INT,
+        PRIMARY KEY (student_id, class_id),
+        FOREIGN KEY (student_id) REFERENCES students(id),
+        FOREIGN KEY (class_id) REFERENCES classes(id)
+    );
+    ```
+    **Explanation**:
+    * A student can have many classes: `student_id` appears multiple times in `enrollments` with different `class_id`s.
+    * A class can have many students: `class_id` appears multiple times with different `student_id`s.
+    * The `PRIMARY KEY` on `(student_id, class_id)` ensures a student can't enroll in the same class twice.
+    
+    // Querying for a student's classes
+    ```sql
+    SELECT c.name 
+    FROM enrollments e
+    JOIN classes c ON e.class_id = c.id
+    WHERE e.student_id = 1;
+    ```
 
 ### 7. Common Mistakes
 *   **The "Select *" Trap**: Fetching 50 columns when you only need one, bloating memory usage and preventing the database from using "Covering Indexes."

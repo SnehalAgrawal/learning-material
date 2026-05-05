@@ -5,6 +5,30 @@ Reliability patterns are the "Protective Gear" of a distributed system. Since ne
 
 ### 2. Key Concepts
 *   **Circuit Breaker**: Detects failures and "opens" to stop calls to a failing service, allowing it time to recover and protecting the caller from hanging.
+    * **App level**
+        ```javascript
+        const CircuitBreaker = require('opossum');
+
+        const options = {
+        timeout: 3000, // fail if slow
+        errorThresholdPercentage: 50, // open circuit if failures > 50%
+        resetTimeout: 10000 // try again after 10s
+        };
+
+        const breaker = new CircuitBreaker(callExternalService, options);
+        breaker.fallback(() => "fallback response");
+        breaker.fire();
+        ```
+        Why app-level?
+            * Fine-grained control per API call
+            * Custom fallback logic
+            * Easier debugging
+    * **Infrastructure level**
+        
+        You can also implement it outside your code using:
+        * Istio
+        * Linkerd
+        * Envoy
 *   **Retry with Exponential Backoff**: Automatically retries a failed operation but waits longer between each attempt (e.g., 100ms, 200ms, 400ms) to avoid "thundering herd" attacks on a struggling service.
 *   **Bulkhead**: Isolates pools of resources (threads, connections) so that a failure in one area doesn't starve another.
 *   **Rate Limiting**: Restricts the number of requests a client can make in a given timeframe (e.g., 100 requests/minute).
@@ -27,8 +51,37 @@ Reliability patterns are the "Protective Gear" of a distributed system. Since ne
 
 ### 6. Interview Focus
 *   **The "Thundering Herd"**: "What happens when 1,000 clients all retry their failed requests at the exact same moment? How do you fix it?" (Hint: Jitter).
+
+    * 1000 clients fail simultaneously → all retry at same time (0ms)
+    * Creates massive load spike on already struggling service
+    * Can cause cascading failures
+    * Fix: Exponential backoff with jitter:
+    * Retry 1: 100ms (±random)
+    * Retry 2: 200ms (±random)
+    * Retry 3: 400ms (±random)
+    * ...
+    * Spreads out retries over time
+    * Reduces peak load
+    * Gives service time to recover
 *   **Circuit Breaker States**: "Explain the 'Half-Open' state of a circuit breaker. How does it transition back to 'Closed'?"
+    * Three states:
+    * CLOSED: Normal operation, normal traffic
+    * OPEN: Fail fast, stop sending traffic
+    * HALF-OPEN: Allow limited test traffic
+    * Transitions:
+        * Closed → Open: Too many failures (error threshold)
+        * Open → Half-Open: Timeout expires (e.g., 1 min)
+        * Half-Open → Closed: Some tests succeed
+        * Half-Open → Open: Tests fail again
 *   **Rate Limiting Algorithms**: "Compare 'Leaky Bucket' vs 'Token Bucket' algorithms for rate limiting."
+    * Leaky Bucket:
+        * Fixed output rate (like a leaky faucet)
+        * Smooths out traffic
+        * Good for: API rate limiting, traffic shaping
+    * Token Bucket:
+        * Variable output rate (tokens added over time)
+        * Allows bursts of traffic
+        * Good for: Burst-tolerant systems, dynamic rate limiting
 
 ### 7. Common Mistakes
 *   **Infinite Retries**: Not setting a maximum retry count, causing requests to loop forever and consume resources.

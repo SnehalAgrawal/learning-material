@@ -31,8 +31,96 @@ Node.js is a runtime built on V8 that uses an Event-Driven, non-blocking I/O mod
 
 ### 6. Interview Focus
 *   **Stream Mechanics**: "How would you read a 10GB file on a machine with 2GB of RAM using Node.js?"
+    ```javascript
+    const fs = require('fs');
+    const readable = fs.createReadStream('large-file.txt', { highWaterMark: 64 * 1024 }); // 64KB chunks
+    let totalBytes = 0;
+    
+    readable.on('data', (chunk) => {
+        totalBytes += chunk.length;
+        // Process chunk without loading entire file
+        // For example, write to another stream or process in memory
+        console.log(`Read ${chunk.length} bytes, total: ${totalBytes}`);
+    });
+    
+    readable.on('error', (err) => {
+        console.error('Error reading file:', err);
+    });
+    ```
 *   **The Cluster Module**: "Explain why `cluster.fork()` is different from multi-threading in other languages."
+    * **Answer**: In Node.js, `cluster.fork()` creates a new *process* (child process), not a thread. This means each worker has its own memory space and event loop. This is different from traditional multi-threading where multiple threads share the same memory space within a single process.
+    * **Example**:
+    ```javascript
+    const cluster = require('cluster');
+    const http = require('http');
+    const numCPUs = require('os').cpus().length;
+    
+    if (cluster.isPrimary) {
+        console.log(`Primary ${process.pid} is running`);
+        
+        // Fork workers
+        for (let i = 0; i < numCPUs; i++) {
+            cluster.fork();
+        }
+        
+        cluster.on('exit', (worker, code, signal) => {
+            console.log(`Worker ${worker.process.pid} died`);
+            cluster.fork(); // Restart worker
+        });
+    } else {
+        // Workers share TCP connections
+        http.createServer((req, res) => {
+            res.writeHead(200);
+            res.end('hello\n');
+        }).listen(8000);
+        
+        console.log(`Worker ${process.pid} started`);
+    }
+    ```
 *   **Backpressure in Streams**: "What happens if a Readable stream is faster than a Writable stream? How does Node.js handle this automatically?" (.pipe() vs manual .write()).
+    * **Backpressure**: Backpressure occurs when a source of data (Readable stream) produces data faster than the destination (Writable stream) can consume it. This can lead to memory overflow as data accumulates in buffers.
+    * **Node.js Handling**: Node.js handles backpressure through the `drain` event. When a Writable stream's buffer is full, it emits a `drain` event. The producer (Readable stream) should pause emitting data until it receives this event, indicating that the consumer is ready for more.
+    * **Example**:
+    ```javascript
+    const fs = require('fs');
+    const readable = fs.createReadStream('large-file.txt');
+    const writable = fs.createWriteStream('output.txt');
+    
+    readable.on('data', (chunk) => {
+        // write() returns false if the buffer is full
+        const stillWriting = writable.write(chunk);
+        if (!stillWriting) {
+            // Pause reading until consumer is ready
+            readable.pause();
+        }
+    });
+    
+    writable.on('drain', () => {
+        // Resume reading when buffer has space
+        readable.resume();
+    });
+    
+    readable.on('end', () => {
+        writable.end();
+    });
+    ```
+    * **The `pipeline` utility**: The `stream.pipeline` function automatically handles backpressure and error propagation for you, making it the recommended way to pipe streams in modern Node.js.
+    ```javascript
+    const { pipeline } = require('stream');
+    const fs = require('fs');
+    
+    pipeline(
+        fs.createReadStream('large-file.txt'),
+        fs.createWriteStream('output.txt'),
+        (err) => {
+            if (err) {
+                console.error('Pipeline failed:', err);
+            } else {
+                console.log('Pipeline succeeded');
+            }
+        }
+    );
+    ```
 
 ### 7. Common Mistakes
 *   **Loading Full Files into Memory**: Using `fs.readFile` for large production files instead of `fs.createReadStream`.

@@ -29,8 +29,28 @@ Messaging systems are the "Asynchronous Backbone" of modern architecture. They e
 
 ### 6. Interview Focus
 *   **Message Loss**: "How do you ensure a message is not lost if a consumer crashes halfway through processing?" (Hint: Acknowledgments/Visible timeouts).
-*   **Exactly-Once**: "Is it possible to achieve 'Exactly-Once' processing? How does Kafka handle it?" (Hint: Transactional writes and Idempotent producers).
+    * Use acknowledgments + visibility timeout:
+        * Consumer processes message → sends ACK after success
+        * If consumer crashes before ACK → message becomes visible again
+        * Queue retries delivery
+    
+    Ensures at-least-once delivery (not loss, but possible duplicates)
+*   **Exactly-Once**: "Is it possible to achieve 'Exactly-Once' processing? How does Kafka handle it? (Hint: Transactional writes and Idempotent producers).
+    * Hard to guarantee end-to-end
+    * Apache Kafka supports it using:
+        * Idempotent producers → no duplicate writes
+        * Transactions → atomic write + offset commit
+    
+    Result: exactly-once within Kafka, but your app logic must still be idempotent
 *   **DLQ Management**: "What do you do with messages in a Dead Letter Queue? Why do we need them?"
+    * Messages that fail repeatedly go to DLQ
+    * Prevents blocking main queue
+    * What to do with them:
+        * Debug / inspect failures
+        * Fix issue → replay messages
+        * Or discard if invalid
+    
+    DLQ = safety net for bad messages
 
 ### 7. Common Mistakes
 *   **Ignoring Idempotency**: Assuming "At-Least-Once" delivery means only one delivery. If your consumer isn't idempotent, you'll process the same order twice.
