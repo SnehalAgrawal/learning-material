@@ -120,8 +120,11 @@ async function getData() {
 ```
 
 10. **Event Loop (Microtasks vs Macrotasks)**
+
 Micro task queue: Promise, Event observer, executeMicroTask()
+
 Task queue: all the other jobs then Micro task queue tasks
+
 ```js
 console.log("Start");
 setTimeout(() => console.log("Timeout"), 0);
@@ -148,12 +151,24 @@ function log(...args) { console.log(args); }
 ```
 
 13. **Optional Chaining & Nullish Coalescing**
-`??` works for "", null, undefined but || for falsy value
+
+`||` (Logical OR), returns the first truthy value. so it treats all falsy values as "missing":
+
+`??` returns the right-hand side only if left is null or undefined.
+
 ```js
 const user = { name: "Alice", address: null };
 user?.address?.city;        // undefined
 user.address ?? "No address"; // "No address"
 ```
+
+| Value | '\|\|' result | '??' result |
+|--------------|------------|------------|
+| "" | default ❌ | "" ✅ |
+| 0 | default ❌ | 0 ✅ |
+| false | default ❌ | false ✅ |
+| null | default ✅ | default ✅ |
+| undefined | default ✅ | default ✅ |
 
 14. **Modules (ESM)**
 ```js

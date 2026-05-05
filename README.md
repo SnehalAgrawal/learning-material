@@ -1,118 +1,42 @@
-# Learning Material
+# Senior & Lead Engineering Interview Knowledge Base
 
-### 🧠 **Core Development**
+A high-quality, structured, and non-redundant knowledge base designed for preparing for Senior, Lead, and Staff Software Engineering interviews. This repository focuses on distributed systems, architecture, backend internals, and leadership principles.
 
-* **Git**: Master it — branching, rebasing, cherry-picking, bisecting, hooks.
-* **VS Code / JetBrains IDEs**: Know your editor inside out — keybindings, refactorings, extensions.
-* **Postman / Insomnia**: For API testing and mocking.
+## 🚀 Navigation
 
----
+The primary entry point for this repository is the **[preparation-content.md](./preparation-content.md)** file.
 
-### 💻 **Backend & API Development**
+This file acts as an interactive index:
+1.  **Clickable Topics**: Every topic in the index links directly to a deep-dive markdown file.
+2.  **Study Tracker**: Use the checkboxes `[ ]` to track your progress as you master each topic.
 
-* **Node.js / Express** (you already know)
-* **Python + FastAPI**: Optional but handy for quick APIs, AI, and scripts.
-* **OpenAPI / Swagger**: Document and auto-generate clients for your APIs.
+## 📁 Repository Structure
 
----
+The knowledge base is organized into 14 core categories:
 
-### 🛠️ **DevOps & Infrastructure**
+1.  **[1-lld](./1-lld/)**: Low-Level Design (OOP, SOLID, Clean Code).
+2.  **[2-design-patterns](./2-design-patterns/)**: Creational, Structural, Behavioral, and Cloud-Native patterns.
+3.  **[3-hld](./3-hld/)**: High-Level Design fundamentals, Architectures, and System Design Frameworks.
+4.  **[4-distributed-systems](./4-distributed-systems/)**: Core concepts, Consistency models, and Reliability patterns.
+5.  **[5-database-design](./5-database-design/)**: SQL/NoSQL deep dives, Scaling, and Caching.
+6.  **[6-backend-engineering](./6-backend-engineering/)**: Gateways, Security, Performance, and Testing Strategies.
+7.  **[7-javascript](./7-javascript/)**: Internals, Event Loop, Advanced Patterns, and Node.js.
+8.  **[8-python](./8-python/)**: Core, Advanced features, Internals, and Concurrency.
+9.  **[9-concurrency](./9-concurrency/)**: OS-level concurrency fundamentals.
+10. **[10-cloud-infra](./10-cloud-infra/)**: Containers, Kubernetes, and Scaling/Deployment strategies.
+11. **[11-observability](./11-observability/)**: Monitoring, Metrics, Tracing, and Incident Management.
+12. **[12-modern-systems](./12-modern-systems/)**: AI Agentic Systems, RAG, and Vector Databases.
+13. **[13-core-fundamentals](./13-core-fundamentals/)**: DSA for Seniors, OS, Networking, and Security.
+14. **[14-leadership-and-behavioral](./14-leadership-and-behavioral/)**: Behavioral interview frameworks (STAR), ADRs, and People Leadership.
 
-* **Docker**: Must. Know how to containerize, run, and debug containers.
-* **Kubernetes (K8s)**: Know the basics of deployment, scaling, and services.
-* **Terraform / Pulumi**: Infrastructure-as-Code (IaC) is now baseline in cloud teams.
-* **CI/CD Tools**: GitHub Actions, GitLab CI, Jenkins — whatever your team uses, own it.
+## 💡 Content Philosophy
 
----
+Every file in this repository follows a consistent structure to ensure maximum value for senior candidates:
 
-### ☁️ **Cloud Platforms**
-
-* **AWS / Azure / GCP**: Pick one. Know IAM, compute (EC2, App Services), databases, object storage (S3/Blob), pub/sub.
-* **Serverless**: Lambda, Azure Functions — good for event-driven or AI microtasks.
-
----
-
-### 🧪 **Testing & Quality**
-
-* **Jest / Mocha / Vitest**: For unit and integration testing.
-* **Cypress / Playwright**: For end-to-end frontend testing.
-* **ESLint / Prettier / SonarQube**: Code quality and standards enforcement.
-
----
-
-### 🗃️ **Databases & Storage**
-
-* **PostgreSQL / MySQL**: Know advanced SQL, indexing, query plans, partitions.
-* **MongoDB / Redis**: For NoSQL and caching use cases.
-* **Kafka / RabbitMQ**: For event-driven and async architectures.
-* **Elasticsearch**: For search and log analytics (optional, but valuable).
-
----
-
-### 📊 **Monitoring & Observability**
-
-* **Grafana + Prometheus**: Metrics dashboarding.
-* **ELK Stack / Loki / OpenTelemetry**: Logs and tracing.
-* **Sentry / New Relic / Datadog**: Error and performance monitoring.
-
----
-
-### 🧩 **Architecture & Design**
-
-* **Draw\.io / Excalidraw / Lucidchart**: For system design diagrams.
-* **Mermaid.js**: For in-code markdown diagrams.
-* **PlantUML**: If you're into detailed modeling.
-
----
-
-### 👨‍💻 **Project & Team Management**
-
-* **Jira / Linear**: Issue tracking, epics, sprints.
-* **Notion / Confluence**: Docs and internal knowledge bases.
-* **Slack / MS Teams + Shortcuts**: Be productive in team comms.
-
----
-
-### 📦 **Package Managers**
-
-* **npm / yarn / pnpm**: Master dependency management.
-* **pip / poetry**: For Python when needed.
-* **Docker Hub / GitHub Packages**: For publishing private builds.
-
----
-
-### 🧠 **AI & Automation (2025 Edge Tools)**
-
-* **LangChain / LlamaIndex**: For integrating LLMs with external data.
-* **LLM APIs (OpenAI, Claude, Gemini)**: Learn prompt engineering, function calling, tool use.
-* **Agent-based frameworks**: LangGraph, Autogen, CrewAI (advanced, optional).
-* **Vector DBs**: Pinecone, Weaviate, Chroma — for AI RAG systems.
-
----
-
-### 🎯 **Bonus: Interview & Growth**
-
-* **LeetCode / NeetCode.io / Codeforces**: DSA refresh.
-* **System Design Primer (GitHub)**: Bookmark-worthy for interviews and planning.
-* **Architecture Decision Records (ADR)**: To document and defend architectural decisions.
-
----
-
-### 🔑 Some more concepts
-
-* **Decouple services**
-* **Fail fast, fail loud**
-* **Observe everything**
-* **Automate what hurts**
-* **Write docs like you’ll forget tomorrow**
-
----
-
-### NGINX Tutorials
-https://www.youtube.com/watch?v=ZmH1L1QeNHk \
-https://www.youtube.com/watch?v=7VAI73roXaY
-
-### For animation video creation
-https://www.youtube.com/watch?v=vV0mj43AI3E \
-https://www.youtube.com/watch?v=4P1XuVeVUQ4 \
-https://www.youtube.com/watch?v=T6Nn6-4exJ0
+*   **Overview**: Concise high-level summary.
+*   **Key Concepts**: Essential technical pillars.
+*   **Real-World Usage**: How these concepts are applied in production systems (e.g., Netflix, Uber, AWS).
+*   **Tradeoffs**: The "It Depends" analysis critical for senior interviews.
+*   **When NOT to Use**: Identifying anti-patterns and constraints.
+*   **Interview Focus**: Scenarios and questions specifically designed for advanced candidates.
+*   **Common Mistakes**: Pitfalls that separate junior from senior engineers.
