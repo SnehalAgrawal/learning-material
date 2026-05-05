@@ -30,8 +30,49 @@ Observability is the measure of how well you can understand the internal state o
 
 ### 6. Interview Focus
 *   **Production Incident Simulation**: "The website is slow. You have a dashboard with CPU and Error Rate. What is your process to find the root cause?"
+    * **Step 1: Check the "Symptom" (User Impact)**
+        * Don't start with CPU.
+        * Check "Error Rate" and "User-facing Latency" (e.g., Apdex score).
+        * *Observation*: "The Error Rate just spiked to 5% and Apdex dropped." (This confirms a real incident).
+    * **Step 2: Check the "Vitals" (System Health)**
+        * Look at "Infrastructure Metrics" (CPU, Memory, Disk I/O).
+        * *Observation*: "CPU is at 40%, Memory is stable." (This rules out a noisy neighbor or OOM killing).
+    * **Step 3: Check the "Network"**
+        * Look at "Network Ingress/Egress" and "Connection Saturation."
+        * *Observation*: "The API Gateway's connection count is maxed out."
+    * **Step 4: Check the "Dependencies"**
+        * Look at "External Service Latency" and "Database Load."
+        * *Observation*: "The Database P95 latency doubled 5 minutes ago."
+    * **Step 5: Check the "Logs" & "Traces"**
+        * Correlate the time from Step 4 with Application Logs or Distributed Traces.
+        * *Conclusion*: "The slow database queries started at the same time as the error spike. It's a DB issue."
 *   **Metrics Design**: "What metrics would you track for a 'Background Job Worker' system?" (Hint: Queue depth, Job duration, Retry count).
+    * **Queue-Level Metrics**:
+        * `queue.depth`: Number of jobs waiting to be processed.
+        * `queue.oldest_job_age`: How long the oldest job has been waiting.
+        * `queue.delayed_jobs`: Number of jobs scheduled for future execution.
+    * **Worker-Level Metrics**:
+        * `worker.active_count`: Number of workers currently processing jobs.
+        * `worker.idle_count`: Number of idle workers available.
+        * `worker.cpu_usage`: CPU utilization of the worker process.
+    * **Job-Level Metrics**:
+        * `job.duration`: Time taken to process a single job (p50, p95, p99).
+        * `job.success_rate`: Percentage of successfully processed jobs.
+        * `job.failure_rate`: Percentage of failed jobs.
+        * `job.retry_count`: Number of times a job has been retried.
+    * **System-Level Metrics**:
+        * `system.memory_usage`: Memory consumed by the worker process.
+        * `system.disk_space`: Available disk space (important for temp files).
+        * `system.network_errors`: Network-related errors during job processing.
 *   **The Difference**: "Explain the difference between 'Monitoring' and 'Observability'."
+    * **Monitoring**: "Do I know when something is wrong?"
+        * **What it answers**: It tells you if the system is healthy or unhealthy based on pre-defined metrics and thresholds.
+        * **How it works**: It relies on *known* failure modes. You proactively define what to watch (e.g., CPU > 90%, Error Rate > 5%).
+        * **Analogy**: Checking the "Check Engine" light on your car. The car tells you *when* it's broken, but not *why*.
+    * **Observability**: "Can I figure out what's wrong?"
+        * **What it answers**: It allows you to ask *any* question about the system's internal state, even for failures you haven't seen before.
+        * **How it works**: It relies on *unknown* failure modes. It collects rich, multi-dimensional data (logs, metrics, traces) that you can slice and dice to debug novel issues.
+        * **Analogy**: A mechanic with a full diagnostic toolkit. They can hook up an OBD-II scanner, check the O2 sensor, read engine codes, and analyze fuel pressure to diagnose *any* engine problem.
 
 ### 7. Common Mistakes
 *   **Alert Fatigue**: Setting too many noisy alerts that engineers start to ignore, causing them to miss a "real" critical outage.
